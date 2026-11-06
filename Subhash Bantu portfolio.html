@@ -1,0 +1,602 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Subhash Bantu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a 900vh scroll stage holds one sticky full-screen WebGL scene, a flight through Subhash's own small universe.
+   Scroll moves the camera past a 4D core (hello), three project planets, an education tower, a skills asteroid belt and a signal beacon (contact).
+   Glass cards carry the readable text for each stop. One committed dark look; every colour is an explicit token. */
+:root {
+  --bg: #070418; --ink: #f6f1ff; --muted: #a79fd0; --line: #3a2f7a;
+  --accent: #ff6b9a; --sky: #6fd3e0; --gold: #ffd166;
+  --font-display: "Syne", "Arial Black", Arial, sans-serif;
+  --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 18px/1.65 var(--font-body); }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.stage-wrap { position: relative; height: 700vh; }
+.snap { position: absolute; left: 0; width: 1px; height: 2px; scroll-snap-align: start; pointer-events: none; }
+.stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--bg); }
+#gl, #gl canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.scrim { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(7, 4, 24, .8) 0%, rgba(7, 4, 24, .45) 40%, rgba(7, 4, 24, 0) 70%); }
+
+.hello {
+  position: absolute; inset: 0; pointer-events: none;
+  display: flex; flex-direction: column; justify-content: center; gap: 20px; padding-block: 96px 80px;
+  padding-left: max(20px, env(safe-area-inset-left, 0px), 4vw); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.tag { font: 500 14px/1.4 var(--font-mono); color: var(--sky); letter-spacing: .04em; display: flex; align-items: center; gap: 10px; }
+.tag i { width: 9px; height: 9px; border-radius: 50%; background: var(--sky); animation: ping 2s ease-out infinite; flex: none; }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(111, 211, 224, .6); } 100% { box-shadow: 0 0 0 14px rgba(111, 211, 224, 0); } }
+h1 { margin: 0; font: 800 clamp(44px, 8.6vw, 124px)/.92 var(--font-display); letter-spacing: -.05em; min-height: 1.84em; }
+h1 .t1, h1 .t2 { display: block; }
+h1 .t2 { color: var(--accent); }
+h1 .cur::after { content: ""; display: inline-block; width: .07em; height: .78em; margin-left: .06em; background: var(--ink); vertical-align: -.02em; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.sub { margin: 0; font: 500 clamp(17px, 2.2vw, 24px)/1.45 var(--font-body); max-width: 26em; }
+
+/* stop cards */
+.card {
+  position: absolute; top: 50%; width: min(440px, 42vw); opacity: 0; visibility: hidden; pointer-events: none;
+  transform: translateY(calc(-50% + var(--ty, 0px)));
+  padding: 28px; border-radius: 28px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start;
+  background: rgba(14, 9, 40, .82); border: 1px solid rgba(167, 159, 208, .28);
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .8);
+}
+.card.on { pointer-events: auto; }
+.card.left { left: max(20px, env(safe-area-inset-left, 0px), 4vw); }
+.card.right { right: max(20px, env(safe-area-inset-right, 0px), 4vw); }
+.card .k { margin: 0; font: 500 13px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--c, var(--accent)); }
+.card h3 { margin: 0; font: 800 clamp(28px, 3.6vw, 44px)/1 var(--font-display); letter-spacing: -.04em; text-wrap: balance; }
+.card p { margin: 0; color: #d9d3f3; font-size: 17px; line-height: 1.55; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.tags li { font: 500 12px/1 var(--font-mono); padding: 8px 12px; border-radius: 999px; background: rgba(255, 255, 255, .1); }
+.repo { font: 500 14px/1.3 var(--font-mono); color: var(--c, var(--sky)); text-decoration: none; border-bottom: 1.5px solid currentColor; padding-bottom: 3px; }
+.repo:hover { opacity: .8; }
+.lv { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; width: 100%; }
+.lv li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 14px; align-items: baseline; padding-top: 12px; border-top: 1px solid rgba(167, 159, 208, .25); }
+.lv b { font: 800 26px/1 var(--font-display); letter-spacing: -.04em; color: var(--c, var(--sky)); font-variant-numeric: tabular-nums; }
+.lv strong { display: block; font-weight: 700; font-size: 17px; line-height: 1.3; }
+.lv span { color: var(--muted); font-size: 15px; line-height: 1.4; }
+.lv em { font: 500 12px/1 var(--font-mono); font-style: normal; color: var(--gold); display: block; margin-top: 6px; }
+.lv span { display: block; }
+
+
+.topnav {
+  position: absolute; z-index: 6; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 22px max(16px, env(safe-area-inset-left, 0px));
+  background: linear-gradient(180deg, rgba(7, 4, 24, .85), rgba(7, 4, 24, 0));
+}
+.logo { font: 800 20px/1 var(--font-display); letter-spacing: -.04em; text-decoration: none; }
+.logo b { color: var(--accent); }
+.topnav nav { display: flex; gap: 4px; }
+.topnav nav button { font: 500 14px/1 var(--font-mono); color: var(--muted); background: transparent; border: 0; cursor: pointer; padding: 10px 14px; border-radius: 999px; transition: color .25s, background .25s; }
+.topnav nav button:hover { color: var(--ink); background: rgba(255, 255, 255, .08); }
+.topnav nav button[aria-current="true"] { color: #1b1340; background: var(--accent); }
+.bottombar {
+  position: absolute; z-index: 6; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 999px; max-width: calc(100vw - 24px);
+  background: rgba(14, 9, 40, .9); border: 1px solid rgba(167, 159, 208, .3);
+}
+.nb { font: 600 15px/1 var(--font-body); padding: 14px 20px; border-radius: 999px; border: 0; cursor: pointer; color: var(--ink); background: rgba(255, 255, 255, .1); transition: background .25s, transform .25s var(--ease), opacity .25s; white-space: nowrap; }
+.nb:hover:not(:disabled) { background: rgba(255, 255, 255, .2); transform: translateY(-1px); }
+.nb:disabled { opacity: .35; cursor: default; }
+.nb.primary { background: var(--accent); color: #1b1340; }
+.nb.primary:hover { background: #ff85ab; }
+.nb { position: relative; }
+.nb.pulse::after { content: ""; position: absolute; inset: 0; border-radius: 999px; border: 2px solid var(--accent); pointer-events: none; animation: nudge 1.8s var(--ease) infinite; }
+@keyframes nudge { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(1.35, 1.8); opacity: 0; } }
+.stepinfo { display: flex; flex-direction: column; align-items: center; gap: 7px; min-width: 120px; }
+.stepinfo span { font: 500 12px/1 var(--font-mono); color: var(--muted); letter-spacing: .04em; white-space: nowrap; }
+.dots { display: flex; gap: 6px; }
+.bdot { width: 8px; height: 8px; padding: 0; border-radius: 50%; border: 0; background: rgba(167, 159, 208, .4); cursor: pointer; transition: background .3s, transform .3s var(--ease); }
+.bdot[aria-current="true"] { background: var(--accent); transform: scale(1.4); }
+.replay { font: 500 13px/1 var(--font-mono); color: var(--ink); background: transparent; border: 2px solid var(--line); border-radius: 999px; padding: 10px 14px; cursor: pointer; }
+.replay:hover { border-color: var(--accent); }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; font: 500 14px/1 var(--font-mono); color: var(--muted); transition: opacity .6s; pointer-events: none; }
+.ready .loading { opacity: 0; }
+
+/* contact */
+.contact { scroll-snap-align: start; background: #070418; padding-block: clamp(72px, 11vw, 140px) 40px; position: relative; z-index: 1; }
+.wrap { max-width: 1100px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h2 { margin: 0 0 clamp(28px, 5vw, 52px); font: 800 clamp(40px, 9vw, 112px)/.92 var(--font-display); letter-spacing: -.05em; }
+h2 em { font-style: normal; color: var(--accent); }
+.rows { margin: 0; display: grid; }
+.row { display: grid; grid-template-columns: 120px minmax(0, 1fr) auto; align-items: center; gap: 8px 20px; padding-block: 20px; border-top: 2px solid var(--line); transition: padding-left .4s var(--ease); }
+.row:last-child { border-bottom: 2px solid var(--line); }
+.row:hover { padding-left: 14px; }
+.row dt { font: 500 13px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.row dd { margin: 0; font: 700 clamp(18px, 3vw, 32px)/1.25 var(--font-body); overflow-wrap: anywhere; min-width: 0; }
+.row a { text-decoration-thickness: 2px; text-underline-offset: 5px; text-decoration-color: var(--accent); }
+.copy { font: 500 13px/1 var(--font-mono); padding: 11px 15px; border-radius: 999px; cursor: pointer; border: 2px solid var(--ink); background: transparent; color: var(--ink); transition: background .25s, color .25s; }
+.copy:hover { background: var(--ink); color: var(--bg); }
+footer { margin-top: 56px; font: 400 13px/1.5 var(--font-mono); color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 24px; }
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.nogl .stage-wrap { display: none; }
+.nogl .sr { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; padding: 72px max(16px, env(safe-area-inset-left, 0px)) 0; max-width: 1100px; margin: 0 auto; }
+.nogl .sr h1 { min-height: 0; margin-bottom: 24px; }
+.nogl .sr h3 { font: 800 28px/1.1 var(--font-display); letter-spacing: -.03em; margin: 32px 0 8px; }
+
+@media (max-width: 760px) {
+  body { font-size: 17px; }
+  .scrim { background: linear-gradient(180deg, rgba(7, 4, 24, .85) 0%, rgba(7, 4, 24, .4) 55%, rgba(7, 4, 24, 0) 85%); }
+  .hello { justify-content: flex-start; padding-top: 96px; gap: 14px; }
+  .topnav { padding-bottom: 14px; }
+  .logo { display: none; }
+  .topnav nav { width: 100%; justify-content: space-between; gap: 0; }
+  .topnav nav button { padding: 9px 10px; font-size: 12.5px; }
+  .nb { padding: 13px 16px; font-size: 14px; }
+  .stepinfo { min-width: 0; }
+  .card { top: auto; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); width: auto; transform: translateY(var(--ty, 0px)); padding: 20px; gap: 10px; border-radius: 22px; }
+  .card.left, .card.right { left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); }
+  .card p { font-size: 15px; }
+  .card h3 { font-size: 26px; }
+  .lv li { grid-template-columns: 54px minmax(0, 1fr); gap: 10px; }
+  .row { grid-template-columns: minmax(0, 1fr) auto; }
+  .row dt { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .tag i, .nb.pulse, h1 .cur::after { animation: none; }
+  .row, .copy, .nb, .bdot { transition: none; }
+}
+</style>
+
+<div class="sr" id="sr">
+  <h1>Hello, I am Subhash Bantu</h1>
+  <p>Web developer and chatbot builder from Hyderabad, Telangana, India. Open to junior developer roles.</p>
+  <h3>Projects</h3>
+  <ul>
+    <li>E-Health Monitoring Chatbot: answers health questions using external APIs, with data kept as JSON in the script. Built with HTML, CSS, JavaScript.</li>
+    <li>Viumsa: a conversational AI assistant growing into an agentic assistant. Python. <a href="https://github.com/Subhash0817/Viumsa">Code on GitHub</a></li>
+    <li>TaskFlow: a task manager with an HTML, CSS and JavaScript interface and a Python backend. <a href="https://github.com/Subhash0817/TASK-FLOW">Code on GitHub</a></li>
+  </ul>
+  <h3>Education</h3>
+  <ul>
+    <li>2026: B.Tech, St. Mary's Engineering College. Completing final requirements in December 2026. Expected CGPA 7.5.</li>
+    <li>2022: Intermediate, Narayana Junior College, 69%.</li>
+    <li>2020: SSC, Gauthami High School, 10/10 GPA.</li>
+  </ul>
+  <h3>Skills</h3>
+  <p>JavaScript, HTML, CSS, Python, REST APIs, JSON, chatbots, agentic AI, GitHub.</p>
+</div>
+
+<div class="stage-wrap" id="stage">
+  <div class="stage" id="sticky">
+    <div id="gl" aria-hidden="true"></div>
+    <div class="scrim" id="scrim" aria-hidden="true"></div>
+    <header class="topnav">
+      <a class="logo" href="#stage" aria-label="Subhash Bantu, back to start">SB<b>.</b></a>
+      <nav aria-label="Sections">
+        <button type="button" data-go="0">Home</button>
+        <button type="button" data-go="1">Projects</button>
+        <button type="button" data-go="4">Education</button>
+        <button type="button" data-go="5">Skills</button>
+        <button type="button" data-go="contact">Contact</button>
+      </nav>
+    </header>
+
+    <div class="hello" id="hello">
+      <span class="tag"><i aria-hidden="true"></i>Hyderabad, India · open to junior developer roles</span>
+      <h1 id="typed" aria-label="Hello, I am Subhash"><span class="t1 cur"></span><span class="t2"></span></h1>
+      <p class="sub">I build web apps and AI chatbots. Press <strong>Start</strong> below for a short tour of my work, one stop at a time.</p>
+    </div>
+
+    <article class="card left" data-step="1" style="--c:#6fe0c4">
+      <p class="k">Project 1 of 3 · Chatbot</p>
+      <h3>E-Health Monitoring Chatbot</h3>
+      <p>A chatbot that takes health questions, calls external APIs for the answers and replies in plain language. Its data lives as JSON inside the script, so it runs without a database.</p>
+      <ul class="tags"><li>HTML</li><li>CSS</li><li>JavaScript</li><li>API integration</li><li>JSON</li></ul>
+    </article>
+    <article class="card right" data-step="2" style="--c:#c59bff">
+      <p class="k">Project 2 of 3 · Conversational AI</p>
+      <h3>Viumsa</h3>
+      <p>A conversational AI assistant you can talk to. I'm growing it into an agentic assistant that can plan and finish tasks on its own.</p>
+      <ul class="tags"><li>Python</li><li>Conversational AI</li><li>Agentic AI</li><li>In progress</li></ul>
+      <a class="repo" href="https://github.com/Subhash0817/Viumsa">View code on GitHub ↗</a>
+    </article>
+    <article class="card left" data-step="3" style="--c:#ffb25c">
+      <p class="k">Project 3 of 3 · Productivity</p>
+      <h3>TaskFlow</h3>
+      <p>A task manager for adding, tracking and finishing daily tasks. The interface is HTML, CSS and JavaScript, and a Python backend keeps the task data.</p>
+      <ul class="tags"><li>HTML</li><li>CSS</li><li>JavaScript</li><li>Python</li></ul>
+      <a class="repo" href="https://github.com/Subhash0817/TASK-FLOW">View code on GitHub ↗</a>
+    </article>
+    <article class="card left" data-step="4" style="--c:#6fd3e0">
+      <p class="k">Education · three levels</p>
+      <h3>Where I studied</h3>
+      <ol class="lv">
+        <li><b>2026</b><div><strong>B.Tech · St. Mary's Engineering College</strong><span>Completing final requirements in December 2026</span><em>Expected CGPA 7.5</em></div></li>
+        <li><b>2022</b><div><strong>Intermediate · Narayana Junior College</strong><em>69%</em></div></li>
+        <li><b>2020</b><div><strong>SSC · Gauthami High School</strong><em>10 / 10 GPA</em></div></li>
+      </ol>
+    </article>
+    <article class="card left" data-step="5" style="--c:#ff6b9a">
+      <p class="k">Skills</p>
+      <h3>What I work with</h3>
+      <p>Frontend with HTML, CSS and JavaScript. Backend with Python. REST APIs and JSON for data. Chatbots and agentic AI are where I'm heading next.</p>
+      <ul class="tags"><li>JavaScript</li><li>HTML</li><li>CSS</li><li>Python</li><li>REST APIs</li><li>JSON</li><li>Chatbots</li><li>Agentic AI</li><li>GitHub</li></ul>
+    </article>
+    <article class="card right" data-step="6" style="--c:#ffd166">
+      <p class="k">Contact</p>
+      <h3>Let's build something</h3>
+      <p>I'm open to junior developer roles and freelance projects. My email, phone and links are one step away.</p>
+      <button class="nb primary" type="button" id="toDetails">See contact details ↓</button>
+    </article>
+
+    <div class="bottombar" role="group" aria-label="Tour controls">
+      <button class="nb" type="button" id="prev" aria-label="Previous stop">← Back</button>
+      <div class="stepinfo"><div class="dots" id="dots"></div><span id="stepLbl" aria-live="polite">1 / 7 · Hello</span></div>
+      <button class="nb primary pulse" type="button" id="next"><span id="nextLbl">Start</span> <span aria-hidden="true">→</span></button>
+    </div>
+    <div class="loading">Launching…</div>
+  </div>
+</div>
+
+<section class="contact" id="contact" aria-labelledby="c-h">
+  <div class="wrap">
+    <h2 id="c-h">let's build<br><em>something.</em></h2>
+    <dl class="rows">
+      <div class="row"><dt>Email</dt><dd><a href="mailto:subhashbantu88@gmail.com" id="v-mail">subhashbantu88@gmail.com</a></dd><button class="copy" type="button" data-copy="v-mail">Copy</button></div>
+      <div class="row"><dt>Phone</dt><dd><a href="tel:+918341241287" id="v-tel">8341241287</a></dd><button class="copy" type="button" data-copy="v-tel">Copy</button></div>
+      <div class="row"><dt>Location</dt><dd>Hyderabad, Telangana, India</dd><span></span></div>
+      <div class="row"><dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/subhash-bantu-294340281/">subhash-bantu</a></dd><span></span></div>
+      <div class="row"><dt>GitHub</dt><dd><a href="https://github.com/Subhash0817">Subhash0817</a></dd><span></span></div>
+    </dl>
+    <footer><span>© 2026 Subhash Bantu</span><button class="replay" type="button" id="replay">Replay the tour ↑</button></footer>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var stageWrap = document.getElementById("stage"), holder = document.getElementById("gl");
+  var scrim = document.getElementById("scrim"), helloEl = document.getElementById("hello");
+
+  document.querySelectorAll(".copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var el = document.getElementById(btn.getAttribute("data-copy"));
+      var reset = function () { setTimeout(function () { btn.textContent = "Copy"; }, 1600); };
+      var fallback = function () { var r = document.createRange(); r.selectNodeContents(el); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Selected"; reset(); };
+      try { navigator.clipboard.writeText(el.textContent).then(function () { btn.textContent = "Copied"; reset(); }, fallback); } catch (e) { fallback(); }
+    });
+  });
+
+  var t1 = document.querySelector("#typed .t1"), t2 = document.querySelector("#typed .t2");
+  var L1 = "Hello, I am", L2 = "Subhash";
+  function typeTo(n) {
+    t1.textContent = L1.slice(0, n); t2.textContent = n > L1.length ? L2.slice(0, n - L1.length) : "";
+    var on2 = n > L1.length; t1.classList.toggle("cur", !on2); t2.classList.toggle("cur", on2);
+  }
+  if (reduce) typeTo(99);
+  else { var ti = 0; setTimeout(function step() { typeTo(++ti); if (ti < L1.length + L2.length) setTimeout(step, ti === L1.length ? 380 : 85); }, 500); }
+
+  function fail() { document.documentElement.classList.add("nogl"); typeTo(99); }
+  if (!window.THREE) { fail(); return; }
+  var renderer;
+  try { renderer = new THREE.WebGLRenderer({ antialias: true }); } catch (e) { fail(); return; }
+
+  try {
+    var V3 = THREE.Vector3;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    holder.appendChild(renderer.domElement);
+    var scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x070418);
+    scene.fog = new THREE.Fog(0x070418, 40, 140);
+    var camera = new THREE.PerspectiveCamera(45, 1.6, 0.1, 400);
+    var D = '"Syne", "Arial Black", sans-serif', B = '"DM Sans", system-ui, sans-serif';
+    function rnd(seed) { var s = seed; return function () { s = (s * 16807) % 2147483647; return s / 2147483647; }; }
+
+    /* lights */
+    scene.add(new THREE.AmbientLight(0x6a5fb0, 0.6));
+    var sun = new THREE.DirectionalLight(0xfff1f5, 1.1); sun.position.set(5, 8, 10); scene.add(sun);
+    var rimL = new THREE.DirectionalLight(0x6fd3e0, 0.5); rimL.position.set(-6, 2, -8); scene.add(rimL);
+    var coreL = new THREE.PointLight(0xff6b9a, 1.6, 22); scene.add(coreL);
+
+    /* helpers */
+    var glowTex = (function () { var c = document.createElement("canvas"); c.width = c.height = 128; var g = c.getContext("2d"); var gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.35, "rgba(255,255,255,.35)"); gr.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })();
+    function glow(color, size, op) { var s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: color, transparent: true, opacity: op == null ? 0.7 : op, blending: THREE.AdditiveBlending, depthWrite: false })); s.scale.set(size, size, 1); return s; }
+    function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+    var redraws = [];
+    function spriteFrom(w, h, scaleW, draw) {
+      var c = document.createElement("canvas"); c.width = w; c.height = h; var g = c.getContext("2d");
+      var tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 4;
+      var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false, fog: false }));
+      sp.renderOrder = 20; sp.scale.set(scaleW, scaleW * h / w, 1);
+      function go() { g.clearRect(0, 0, w, h); draw(g, w, h); tex.needsUpdate = true; }
+      go(); redraws.push(go); return sp;
+    }
+    function planet(r, cA, cB, seed) {
+      var geo = new THREE.IcosahedronGeometry(r, 3), pos = geo.attributes.position, col = new Float32Array(pos.count * 3);
+      var A = new THREE.Color(cA), Bc = new THREE.Color(cB), tmp = new THREE.Color();
+      for (var i = 0; i < pos.count; i++) {
+        var x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+        var n = (Math.sin(x * 1.7 + seed) * Math.cos(y * 2.1 + seed * 1.3) + Math.sin(z * 2.3 + seed * 0.7) + Math.sin((x + y) * 3.1 + seed)) / 3;
+        var k = 1 + n * 0.035; pos.setXYZ(i, x * k, y * k, z * k);
+        tmp.copy(A).lerp(Bc, n * 0.5 + 0.5); col[i * 3] = tmp.r; col[i * 3 + 1] = tmp.g; col[i * 3 + 2] = tmp.b;
+      }
+      geo.setAttribute("color", new THREE.BufferAttribute(col, 3)); geo.computeVertexNormals();
+      return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.85, metalness: 0.05 }));
+    }
+
+    /* stars + nebula */
+    (function () {
+      var n = 2800, p = new Float32Array(n * 3), c = new Float32Array(n * 3), r = rnd(11), col = new THREE.Color();
+      for (var i = 0; i < n; i++) {
+        p[i * 3] = (r() - 0.5) * 140; p[i * 3 + 1] = (r() - 0.5) * 80; p[i * 3 + 2] = 40 - r() * 190;
+        col.setHSL(0.55 + r() * 0.35, 0.6, 0.65 + r() * 0.3); c[i * 3] = col.r; c[i * 3 + 1] = col.g; c[i * 3 + 2] = col.b;
+      }
+      var g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(p, 3)); g.setAttribute("color", new THREE.BufferAttribute(c, 3));
+      scene.add(new THREE.Points(g, new THREE.PointsMaterial({ size: 0.16, vertexColors: true, transparent: true, opacity: 0.9, fog: false })));
+      [[-22, 6, -30, 0x6d4bff, 60], [24, -6, -56, 0xff6b9a, 70], [-16, 10, -78, 0x2fb7c8, 60], [18, 4, -100, 0x7a3a9e, 70], [0, -12, -12, 0x4a2fb0, 50]].forEach(function (q) {
+        var s = glow(q[3], q[4], 0.28); s.position.set(q[0], q[1], q[2]); s.material.fog = false; scene.add(s);
+      });
+    })();
+
+    /* 0. core: a rotating 4D tesseract inside a halo */
+    var core = new THREE.Group(); scene.add(core);
+    var tv = [], i, j, kk; for (i = 0; i < 16; i++) tv.push([i & 1 ? 1 : -1, i & 2 ? 1 : -1, i & 4 ? 1 : -1, i & 8 ? 1 : -1]);
+    var te = []; for (i = 0; i < 16; i++) for (kk = 0; kk < 4; kk++) { j = i ^ (1 << kk); if (i < j) te.push([i, j]); }
+    var tpos = new Float32Array(te.length * 6), tgeo = new THREE.BufferGeometry(); tgeo.setAttribute("position", new THREE.BufferAttribute(tpos, 3));
+    var tessA = new THREE.LineSegments(tgeo, new THREE.LineBasicMaterial({ color: 0xff6b9a })); tessA.scale.setScalar(2.4); tessA.frustumCulled = false; core.add(tessA);
+    var tessB = new THREE.LineSegments(tgeo, new THREE.LineBasicMaterial({ color: 0x6fd3e0, transparent: true, opacity: 0.7 })); tessB.scale.setScalar(1.3); tessB.frustumCulled = false; core.add(tessB);
+    core.add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.55, 1), new THREE.MeshBasicMaterial({ color: 0xfff0f6 })));
+    var halo = glow(0xff6b9a, 9, 0.75); core.add(halo);
+    function rot(v, a, b, ang) { var c = Math.cos(ang), s = Math.sin(ang), x = v[a], y = v[b]; v[a] = x * c - y * s; v[b] = x * s + y * c; }
+    function updTess(t) {
+      var P = tv.map(function (v) { var w = v.slice(); rot(w, 0, 3, t * 0.7); rot(w, 1, 2, t * 0.5); rot(w, 0, 2, t * 0.3); var s = 1.1 / (3 - w[3]); return [w[0] * s, w[1] * s, w[2] * s]; });
+      te.forEach(function (e, n) { var a = P[e[0]], b = P[e[1]]; tpos.set([a[0], a[1], a[2], b[0], b[1], b[2]], n * 6); });
+      tgeo.attributes.position.needsUpdate = true;
+    }
+    updTess(0.8);
+    var orbiters = [];
+    for (i = 0; i < 6; i++) {
+      var ob = new THREE.Mesh(new THREE.OctahedronGeometry(0.16, 0), new THREE.MeshStandardMaterial({ color: i % 2 ? 0x6fd3e0 : 0xffd166, emissive: i % 2 ? 0x6fd3e0 : 0xffd166, emissiveIntensity: 0.5, flatShading: true }));
+      ob.userData = { a: i / 6 * Math.PI * 2, r: 4.2 + (i % 3) * 0.7, s: 0.3 + (i % 3) * 0.08, y: (i - 2.5) * 0.35 }; core.add(ob); orbiters.push(ob);
+    }
+
+    /* 1. planet: E-Health, with an ECG halo and a drifting medical cross */
+    var P1 = new V3(4, 0.5, -14), P2 = new V3(-4, -0.5, -32), P3 = new V3(4, 1, -50);
+    var g1 = new THREE.Group(); g1.position.copy(P1); scene.add(g1);
+    var p1 = planet(2.0, 0x16a085, 0x8be9c9, 3); g1.add(p1);
+    var p1g = glow(0x6fe0c4, 8, 0.35); g1.add(p1g);
+    var ecgN = 160, ecgGeo = new THREE.BufferGeometry(), ecgPos = new Float32Array(ecgN * 3); ecgGeo.setAttribute("position", new THREE.BufferAttribute(ecgPos, 3));
+    var ecg = new THREE.LineLoop(ecgGeo, new THREE.LineBasicMaterial({ color: 0xff5a6e })); ecg.frustumCulled = false; ecg.rotation.set(-0.35, 0.25, 0); g1.add(ecg);
+    function shape(s) {
+      if (s < 0.04) return 0; if (s < 0.07) return 0.15 * Math.sin((s - 0.04) / 0.03 * Math.PI); if (s < 0.09) return -0.1 * ((s - 0.07) / 0.02);
+      if (s < 0.11) return -0.1 + 1.3 * ((s - 0.09) / 0.02); if (s < 0.13) return 1.2 - 1.6 * ((s - 0.11) / 0.02); if (s < 0.15) return -0.4 + 0.4 * ((s - 0.13) / 0.02);
+      if (s < 0.24) return 0.2 * Math.sin((s - 0.15) / 0.09 * Math.PI); return 0;
+    }
+    function updEcg(t) {
+      for (var k = 0; k < ecgN; k++) {
+        var a = k / ecgN * Math.PI * 2, s = ((k / ecgN) * 3 - t * 0.35) % 1; if (s < 0) s += 1;
+        var rad = 3.1 + shape(s) * 0.9; ecgPos[k * 3] = Math.cos(a) * rad; ecgPos[k * 3 + 1] = Math.sin(a) * rad; ecgPos[k * 3 + 2] = 0;
+      }
+      ecgGeo.attributes.position.needsUpdate = true;
+    }
+    updEcg(0);
+    var cross = new THREE.Group(), cm = new THREE.MeshStandardMaterial({ color: 0xff5a6e, emissive: 0xff5a6e, emissiveIntensity: 0.4 });
+    cross.add(new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.2, 0.2), cm)); cross.add(new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.62, 0.2), cm)); g1.add(cross);
+
+    /* 2. planet: Viumsa, with expanding sound-wave rings */
+    var g2 = new THREE.Group(); g2.position.copy(P2); scene.add(g2);
+    var p2 = planet(2.2, 0x6a3dff, 0xd2b2ff, 9); g2.add(p2);
+    var p2w = new THREE.Mesh(new THREE.IcosahedronGeometry(2.32, 2), new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.12 })); g2.add(p2w);
+    var p2g = glow(0xc59bff, 9, 0.35); g2.add(p2g);
+    var waves = []; for (i = 0; i < 4; i++) { var wv = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.035, 8, 64), new THREE.MeshBasicMaterial({ color: 0xd9c2ff, transparent: true, opacity: 0.6 })); wv.rotation.y = -0.3; g2.add(wv); waves.push(wv); }
+
+    /* 3. planet: TaskFlow, with orbiting task cubes */
+    var g3 = new THREE.Group(); g3.position.copy(P3); scene.add(g3);
+    var p3 = planet(2.0, 0xe8590c, 0xffd166, 5); g3.add(p3);
+    var p3g = glow(0xffb25c, 8, 0.35); g3.add(p3g);
+    var tasks = [];
+    for (i = 0; i < 7; i++) {
+      var done = i < 3, tm = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.42), new THREE.MeshStandardMaterial({ color: done ? 0x4ade80 : 0xf6f1ff, emissive: done ? 0x4ade80 : 0x222244, emissiveIntensity: done ? 0.5 : 0.2, roughness: 0.4 }));
+      tm.userData = { a: i / 7 * Math.PI * 2, r: 3.6 }; g3.add(tm); tasks.push(tm);
+    }
+
+    /* 4. education tower: three glowing levels with labels */
+    var EDU = new V3(3.2, 0, -66), eduG = new THREE.Group(); eduG.position.copy(EDU); scene.add(eduG);
+    var levels = [[-1.9, "2020", "SSC · Gauthami High School", 0x6fd3e0], [0, "2022", "Intermediate · Narayana Junior", 0x6fd3e0], [1.9, "2026", "B.Tech · St. Mary's Engineering", 0xff6b9a]];
+    var rings = [];
+    levels.forEach(function (lv, n) {
+      var g = new THREE.Group(); g.position.y = lv[0]; g.rotation.x = 1.05; eduG.add(g);
+      var ring = new THREE.Mesh(new THREE.TorusGeometry(1.25, 0.06, 12, 64), new THREE.MeshBasicMaterial({ color: lv[3] })); g.add(ring); rings.push(ring);
+      g.add(new THREE.Mesh(new THREE.CircleGeometry(1.2, 48), new THREE.MeshBasicMaterial({ color: lv[3], transparent: true, opacity: 0.12, side: THREE.DoubleSide })));
+      var lab = spriteFrom(520, 200, 2.0, function (c, w, h) {
+        c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = n === 2 ? "#ff6b9a" : "#6fd3e0"; c.font = "800 140px " + D; c.fillText(lv[1], w / 2, h / 2 + 6);
+      });
+      lab.position.set(0, lv[0], 0.4); eduG.add(lab);
+    });
+
+    /* 5. skills belt: orbiting chips and rocks */
+    var BELT = new V3(0, 0, -85), belt = new THREE.Group(); belt.position.copy(BELT); belt.rotation.set(0.45, 0, 0.2); scene.add(belt);
+    var rockN = 320, rocks = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.12, 0), new THREE.MeshStandardMaterial({ color: 0x8c80c9, flatShading: true, roughness: 1 }), rockN), r2 = rnd(5), dm = new THREE.Object3D();
+    for (i = 0; i < rockN; i++) {
+      var ra = r2() * Math.PI * 2, rad = 5.4 + r2() * 4.2; dm.position.set(Math.cos(ra) * rad, (r2() - 0.5) * 1.4, Math.sin(ra) * rad);
+      dm.rotation.set(r2() * 6, r2() * 6, r2() * 6); dm.scale.setScalar(0.4 + r2() * 1.7); dm.updateMatrix(); rocks.setMatrixAt(i, dm.matrix);
+    }
+    belt.add(rocks);
+    var skills = [["JavaScript", 1], ["HTML", 0], ["CSS", 0], ["Python", 1], ["REST APIs", 0], ["JSON", 0], ["Chatbots", 0], ["Agentic AI", 1], ["GitHub", 0]];
+    skills.forEach(function (s, n) {
+      var cw = 90 + s[0].length * 34, sp = spriteFrom(cw, 120, cw / 120, function (c, w) {
+        rr(c, 6, 14, w - 12, 92, 46);
+        if (s[1]) { c.fillStyle = "#ff6b9a"; c.fill(); c.fillStyle = "#1b1340"; } else { c.fillStyle = "rgba(14,9,40,.8)"; c.fill(); c.strokeStyle = "rgba(246,241,255,.6)"; c.lineWidth = 4; c.stroke(); c.fillStyle = "#f6f1ff"; }
+        c.font = "700 50px " + B; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(s[0], w / 2, 62);
+      });
+      var a = n / skills.length * Math.PI * 2; sp.position.set(Math.cos(a) * 7.4, ((n % 3) - 1) * 0.7, Math.sin(a) * 7.4); belt.add(sp);
+    });
+
+    /* 6. contact beacon */
+    var BEAC = new V3(-3, -1, -108), bea = new THREE.Group(); bea.position.copy(BEAC); scene.add(bea);
+    var metal = new THREE.MeshStandardMaterial({ color: 0xb9b3e8, metalness: 0.6, roughness: 0.35, flatShading: true });
+    var mast = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.3, 3.2, 10), metal); mast.position.y = -0.4; bea.add(mast);
+    var dish = new THREE.Mesh(new THREE.SphereGeometry(1.5, 28, 14, 0, Math.PI * 2, 0, Math.PI * 0.42), new THREE.MeshStandardMaterial({ color: 0xe9e4ff, metalness: 0.5, roughness: 0.3, side: THREE.DoubleSide })); dish.position.y = 1.4; dish.rotation.x = Math.PI / 2 + 0.15; dish.rotation.z = 0.35; bea.add(dish);
+    var feed = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 10), new THREE.MeshBasicMaterial({ color: 0xffd166 })); feed.position.set(0.3, 1.5, 1.2); bea.add(feed);
+    var fg = glow(0xffd166, 7, 0.6); fg.position.set(0.3, 1.5, 1.2); bea.add(fg);
+    var pings = []; for (i = 0; i < 5; i++) { var pg = new THREE.Mesh(new THREE.TorusGeometry(1, 0.03, 8, 64), new THREE.MeshBasicMaterial({ color: 0xffd166, transparent: true, opacity: 0.7 })); pg.position.set(0.3, 1.5, 1.2); bea.add(pg); pings.push(pg); }
+    var beaL = new THREE.PointLight(0xffd166, 1.2, 14); beaL.position.set(0.3, 2, 3); bea.add(beaL);
+
+    /* ---------- camera stops ---------- */
+    var STOPS = [
+      { p: 0.00, cam: [0, 1.2, 12], look: [-3.4, 0, 0], obj: [0, 0, 0] },
+      { p: 0.166667, cam: [0, 0.5, -3], look: [1.5, 0.5, -15], obj: P1 },
+      { p: 0.333333, cam: [0, 0, -21], look: [-1.5, 0, -33], obj: P2 },
+      { p: 0.5, cam: [0, 0.5, -39], look: [1.5, 0.8, -51], obj: P3 },
+      { p: 0.666667, cam: [0, 0.3, -53], look: [1.2, 0.2, -67], obj: EDU },
+      { p: 0.833333, cam: [0, 0.4, -69], look: [0, 0, -85], obj: BELT },
+      { p: 1.00, cam: [0, 0.8, -97], look: [-0.6, -0.4, -108], obj: BEAC }
+    ];
+    var camCurve, lookCurve;
+    function arr(a) { return a.isVector3 ? a.clone() : new V3(a[0], a[1], a[2]); }
+    function buildPath() {
+      var f = Math.max(0.25, Math.min(1, camera.aspect / 1.6)), back = 1 + (1 - f) * 0.45, cams = [], looks = [];
+      STOPS.forEach(function (s) {
+        var o = arr(s.obj), c = arr(s.cam), l = arr(s.look);
+        cams.push(o.clone().add(c.clone().sub(o).multiplyScalar(back)));
+        looks.push(o.clone().add(l.clone().sub(o).multiplyScalar(f)));
+      });
+      camCurve = new THREE.CatmullRomCurve3(cams, false, "centripetal"); lookCurve = new THREE.CatmullRomCurve3(looks, false, "centripetal");
+    }
+    function resize() {
+      var w = holder.clientWidth || window.innerWidth, h = holder.clientHeight || window.innerHeight;
+      renderer.setSize(w, h, false); camera.aspect = w / h;
+      if (camera.aspect < 0.9) camera.setViewOffset(w, h, 0, Math.round(h * 0.13), w, h); else camera.clearViewOffset();
+      var narrow = camera.aspect < 0.9; eduG.position.y = EDU.y + (narrow ? 1.7 : 0);
+      eduG.children.forEach(function (ch) { if (ch.userData.y0 == null) ch.userData.y0 = ch.position.y; ch.position.y = ch.userData.y0 * (narrow ? 0.75 : 1); });
+      camera.updateProjectionMatrix(); buildPath();
+    }
+    window.addEventListener("resize", resize); resize();
+
+    /* ---------- scroll + loop ---------- */
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+    function ss(a, b, v) { var t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
+    var targetP = 0, curP = 0, visible = true, mx = 0, my = 0, tmx = 0, tmy = 0, last = performance.now(), time = 0;
+    function readScroll() { var r = stageWrap.getBoundingClientRect(), span = r.height - window.innerHeight; targetP = clamp(-r.top / Math.max(1, span), 0, 1); }
+    window.addEventListener("scroll", readScroll, { passive: true });
+    window.addEventListener("pointermove", function (e) { tmx = (e.clientX / window.innerWidth - 0.5) * 2; tmy = (e.clientY / window.innerHeight - 0.5) * 2; }, { passive: true });
+    new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (visible) last = performance.now(); }).observe(stageWrap);
+    var coreS = 1;
+    var coreS = 1;
+    var STEPS = 6, LABELS = ["Hello", "Project 1", "Project 2", "Project 3", "Education", "Skills", "Contact"], NAVMAP = [0, 1, 1, 1, 2, 3, 4];
+    var cards = [].slice.call(document.querySelectorAll(".card"));
+    var navBtns = [].slice.call(document.querySelectorAll(".topnav nav button")), dotsEl = document.getElementById("dots");
+    var stepLbl = document.getElementById("stepLbl"), prevB = document.getElementById("prev"), nextB = document.getElementById("next"), nextLbl = document.getElementById("nextLbl");
+    var dotBtns = [], snaps = [], uiStep = -1;
+    for (i = 0; i <= STEPS; i++) {
+      (function (k) {
+        var d = document.createElement("button"); d.type = "button"; d.className = "bdot"; d.setAttribute("aria-label", "Go to " + LABELS[k]);
+        d.addEventListener("click", function () { goTo(k); }); dotsEl.appendChild(d); dotBtns.push(d);
+      })(i);
+    }
+    function placeSnaps() {
+      var span = stageWrap.offsetHeight - window.innerHeight;
+      for (var k = 0; k <= STEPS; k++) {
+        var d = snaps[k]; if (!d) { d = document.createElement("div"); d.className = "snap"; d.setAttribute("aria-hidden", "true"); stageWrap.appendChild(d); snaps[k] = d; }
+        d.style.top = Math.round(k / STEPS * span) + "px";
+      }
+    }
+    placeSnaps(); window.addEventListener("resize", placeSnaps);
+    function goTo(k) {
+      k = clamp(k, 0, STEPS);
+      var r = stageWrap.getBoundingClientRect(), top = r.top + window.pageYOffset, span = r.height - window.innerHeight;
+      window.scrollTo({ top: top + k / STEPS * span, behavior: reduce ? "auto" : "smooth" });
+    }
+    function toContact() { document.getElementById("contact").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }); }
+    function curStep() { return Math.round(targetP * STEPS); }
+    function next() { var k = curStep(); if (k >= STEPS) toContact(); else goTo(k + 1); }
+    function prev() { goTo(curStep() - 1); }
+    nextB.addEventListener("click", next); prevB.addEventListener("click", prev);
+    document.getElementById("toDetails").addEventListener("click", toContact);
+    document.getElementById("replay").addEventListener("click", function () { goTo(0); });
+    document.querySelector(".logo").addEventListener("click", function (e) { e.preventDefault(); goTo(0); });
+    navBtns.forEach(function (b) { b.addEventListener("click", function () { var g = b.dataset.go; if (g === "contact") toContact(); else goTo(+g); }); });
+    document.addEventListener("keydown", function (e) {
+      if (e.altKey || e.ctrlKey || e.metaKey) return;
+      var t = e.target; if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+      if (stageWrap.getBoundingClientRect().bottom < window.innerHeight * 0.9) return;
+      var k = e.key;
+      if (k === "ArrowDown" || k === "ArrowRight" || k === "PageDown" || (k === " " && (t === document.body || !t))) { e.preventDefault(); next(); }
+      else if (k === "ArrowUp" || k === "ArrowLeft" || k === "PageUp") { e.preventDefault(); prev(); }
+      else if (k === "Home") { e.preventDefault(); goTo(0); }
+    });
+    function updateUI(p) {
+      var k = Math.round(p * STEPS); if (k === uiStep) return; uiStep = k;
+      stepLbl.textContent = (k + 1) + " / " + (STEPS + 1) + " · " + LABELS[k];
+      dotBtns.forEach(function (d, n) { d.setAttribute("aria-current", n === k ? "true" : "false"); });
+      navBtns.forEach(function (b, n) { b.setAttribute("aria-current", n === NAVMAP[k] ? "true" : "false"); });
+      prevB.disabled = k === 0; nextLbl.textContent = k === 0 ? "Start" : k === STEPS ? "Contact details" : "Next";
+      nextB.classList.toggle("pulse", k === 0 && !reduce);
+    }
+    updateUI(0);
+
+    function tick(now) {
+      requestAnimationFrame(tick);
+      if (!visible) return;
+      var dt = Math.min(0.05, (now - last) / 1000); last = now; time += dt;
+      readScroll();
+      curP = reduce ? targetP : curP + (targetP - curP) * (1 - Math.pow(0.0006, dt));
+      var p = curP, n = STOPS.length, seg = 0;
+      while (seg < n - 2 && p > STOPS[seg + 1].p) seg++;
+      var t = clamp((p - STOPS[seg].p) / (STOPS[seg + 1].p - STOPS[seg].p), 0, 1), e = ss(0.2, 0.8, t), u = (seg + e) / (n - 1);
+      var pos = camCurve.getPoint(clamp(u, 0, 1)), look = lookCurve.getPoint(clamp(u, 0, 1));
+      mx += (tmx - mx) * 0.05; my += (tmy - my) * 0.05;
+      camera.position.set(pos.x + mx * 0.35, pos.y - my * 0.22, pos.z);
+      camera.lookAt(look);
+
+      if (!reduce) {
+        updTess(time * 0.6); tessA.rotation.y = time * 0.12; tessB.rotation.x = -time * 0.18;
+        halo.scale.setScalar(9 + Math.sin(time * 1.6) * 0.5);
+        orbiters.forEach(function (o, k) { var d = o.userData, a = d.a + time * d.s; o.position.set(Math.cos(a) * d.r, d.y + Math.sin(a * 2) * 0.3, Math.sin(a) * d.r); o.rotation.x = time + k; o.rotation.y = time * 0.7; });
+        p1.rotation.y = time * 0.12; p2.rotation.y = -time * 0.1; p3.rotation.y = time * 0.14; p2w.rotation.y = time * 0.05;
+        updEcg(time);
+        cross.position.set(Math.cos(time * 0.6) * 3.9, Math.sin(time * 0.6) * 1.4, Math.sin(time * 0.6) * 3.9); cross.rotation.y = time; cross.rotation.z = time * 0.5;
+        waves.forEach(function (w, k) { var ph = ((time * 0.35 + k / 4) % 1), s = 0.9 + ph * 1.7; w.scale.set(s, s, 1); w.material.opacity = (1 - ph) * 0.7; });
+        tasks.forEach(function (tk, k) { var d = tk.userData, a = d.a + time * 0.5; tk.position.set(Math.cos(a) * d.r, Math.sin(a) * 1.0 + Math.sin(a * 2) * 0.2, Math.sin(a) * d.r * 0.8); tk.rotation.x = time * 0.8 + k; tk.rotation.y = time * 0.6; });
+        rings.forEach(function (r, k) { r.rotation.z = time * (0.3 + k * 0.1); });
+        belt.rotation.y = time * 0.08;
+        pings.forEach(function (pg2, k) { var ph = ((time * 0.45 + k / 5) % 1), s = 0.6 + ph * 7; pg2.scale.set(s, s, 1); pg2.material.opacity = (1 - ph) * 0.75; });
+        dish.rotation.z = 0.35 + Math.sin(time * 0.5) * 0.15;
+      }
+
+      [[core, 0], [g1, 1 / 6], [g2, 2 / 6], [g3, 3 / 6], [eduG, 4 / 6], [belt, 5 / 6], [bea, 1]].forEach(function (q) {
+        var sc = 1 - ss(0.09, 0.16, Math.abs(p - q[1]));
+        q[0].visible = sc > 0.01; q[0].scale.setScalar(Math.max(sc, 0.0001));
+        if (q[0] === core) coreS = sc;
+      });
+      coreL.intensity = (1.4 + 0.25 * Math.sin(time * 2)) * coreS;
+      var ho = 1 - ss(0.02, 0.09, p);
+      helloEl.style.opacity = ho; scrim.style.opacity = ho; helloEl.style.visibility = ho < 0.01 ? "hidden" : "visible";
+      helloEl.style.transform = "translateY(" + (-24 * (1 - ho)) + "px)";
+      cards.forEach(function (c) {
+        var at = parseFloat(c.dataset.step) / STEPS, inn = ss(at - 0.09, at - 0.04, p), out = ss(at + 0.04, at + 0.09, p), o = inn * (1 - out);
+        c.style.opacity = o; c.style.visibility = o < 0.02 ? "hidden" : "visible"; c.classList.toggle("on", o > 0.5);
+        c.style.setProperty("--ty", ((1 - inn) * 36 - out * 36) + "px");
+      });
+      updateUI(p);
+      renderer.render(scene, camera);
+    }
+    readScroll(); curP = targetP;
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { redraws.forEach(function (f) { f(); }); });
+    document.getElementById("sticky").classList.add("ready");
+    requestAnimationFrame(tick);
+  } catch (err) {
+    if (window.console) console.error(err);
+    fail();
+  }
+})();
+</script>
+
+</body></html>
